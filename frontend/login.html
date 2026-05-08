@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log in · Atmos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:wght@300;400;500&family=Inter+Tight:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="page-auth">
+    <div class="grain"></div>
+    <main class="auth-shell">
+      <a href="/" class="brand brand--small">
+        <span class="brand__mark">◐</span>
+        <span class="brand__name">Atmos</span>
+      </a>
+
+      <div class="auth-card">
+        <p class="eyebrow">Returning observer</p>
+        <h1 class="display display--sm">
+          Welcome <em>back</em><br />to the observatory.
+        </h1>
+
+        <form id="loginForm" class="form" autocomplete="on">
+          <label class="field">
+            <span class="field__label">Email</span>
+            <input
+              type="email"
+              name="email"
+              required
+              autocomplete="email"
+              class="field__input"
+            />
+          </label>
+          <label class="field">
+            <span class="field__label">Password</span>
+            <input
+              type="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              class="field__input"
+            />
+          </label>
+
+          <div class="form__error hidden" id="formError"></div>
+
+          <button type="submit" class="btn btn--primary btn--block">
+            Enter the observatory
+          </button>
+        </form>
+
+        <p class="auth-card__alt">
+          New here? <a class="link" href="/signup.html">Create an account</a>
+        </p>
+      </div>
+    </main>
+
+    <script src="/js/auth.js"></script>
+    <script>
+      (function () {
+        if (Auth.token()) location.href = '/';
+        const form = document.getElementById('loginForm');
+        const errEl = document.getElementById('formError');
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          errEl.classList.add('hidden');
+          const fd = new FormData(form);
+          try {
+            await Auth.login(fd.get('email'), fd.get('password'));
+            location.href = '/';
+          } catch (err) {
+            errEl.textContent = err.message;
+            errEl.classList.remove('hidden');
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
