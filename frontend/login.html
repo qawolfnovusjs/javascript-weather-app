@@ -74,6 +74,9 @@
           const fd = new FormData(form);
           try {
             await Auth.login(fd.get('email'), fd.get('password'));
+            if (typeof pendo !== 'undefined') {
+              pendo.track('user_logged_in');
+            }
             location.href = '/';
           } catch (err) {
             errEl.textContent = err.message;

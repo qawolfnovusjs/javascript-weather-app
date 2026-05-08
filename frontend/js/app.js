@@ -75,6 +75,9 @@
     }
   }
   els.nav.logout.addEventListener('click', () => {
+    if (typeof pendo !== 'undefined') {
+      pendo.track('user_logged_out');
+    }
     Auth.logout();
     location.reload();
   });
@@ -95,8 +98,22 @@
     try {
       const data = await Auth.request(`/api/weather/geocode?q=${encodeURIComponent(q)}`);
       if (!data.results.length) {
+        if (typeof pendo !== 'undefined') {
+          pendo.track('weather_search_executed', {
+            query: q,
+            resultsCount: 0,
+            hasResults: false
+          });
+        }
         els.search.hint.textContent = 'No matching places. Try another spelling?';
         return;
+      }
+      if (typeof pendo !== 'undefined') {
+        pendo.track('weather_search_executed', {
+          query: q,
+          resultsCount: data.results.length,
+          hasResults: data.results.length > 0
+        });
       }
       els.search.hint.textContent = 'Select a location:';
       data.results.forEach((p) => {
@@ -132,6 +149,17 @@
         `/api/weather/forecast?lat=${place.latitude}&lon=${place.longitude}`
       );
       renderReport(place, data);
+      if (typeof pendo !== 'undefined') {
+        pendo.track('forecast_loaded', {
+          locationName: place.name,
+          country: place.country || '',
+          latitude: place.latitude,
+          longitude: place.longitude,
+          weatherCondition: wxText((data.current || {}).weather_code),
+          temperature: Math.round((data.current || {}).temperature_2m),
+          source: 'search'
+        });
+      }
     } catch (err) {
       showError(err.message);
     }
@@ -234,6 +262,13 @@
           longitude: currentLocation.longitude
         })
       });
+      if (typeof pendo !== 'undefined') {
+        pendo.track('location_saved', {
+          locationLabel: label,
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude
+        });
+      }
       els.report.saveBtn.textContent = '✓ Saved';
       setTimeout(() => (els.report.saveBtn.textContent = '+ Save location'), 1800);
       loadSaved();
@@ -275,6 +310,12 @@
           e.stopPropagation();
           try {
             await Auth.request(`/api/auth/locations/${loc.id}`, { method: 'DELETE' });
+            if (typeof pendo !== 'undefined') {
+              pendo.track('location_removed', {
+                locationId: loc.id,
+                locationLabel: loc.label
+              });
+            }
             loadSaved();
           } catch (err) {
             showError(err.message);

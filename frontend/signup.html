@@ -88,6 +88,11 @@
               fd.get('password'),
               fd.get('displayName') || null
             );
+            if (typeof pendo !== 'undefined') {
+              pendo.track('user_signed_up', {
+                hasDisplayName: !!fd.get('displayName')
+              });
+            }
             location.href = '/';
           } catch (err) {
             errEl.textContent = err.message;
